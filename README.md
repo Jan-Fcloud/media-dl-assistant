@@ -8,9 +8,8 @@ I'm making it open source for the obvious reason of guaranteeing that it only do
 Please do keep in mind that I am by no means and standards a "good programmer" so I will be improving it with time once I find more efficient methods and such.
 
 
-# Requirements: [youtube-dl](https://github.com/ytdl-org/youtube-dl)
-Without it, my program is useless. The download will only be necesary once since my program runs an update on startup.
-And the program of course: [Click to go to Releases](https://github.com/Jan-Fcloud/youtube-dl-Assistant/releases)
+# Requirements: [youtube-dl.exe](https://github.com/ytdl-org/youtube-dl/releases/) and [youtube-dl-assistant.exe](https://github.com/Jan-Fcloud/youtube-dl-Assistant/releases)
+Note: Without youtube-dl, my program is useless. The download will only be necesary once since my program runs an update on startup.
 
 # Setup
 The setup is simple with only 1 or 2 steps necessary.
