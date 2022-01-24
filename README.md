@@ -22,6 +22,7 @@ Your directory should pretty much look like this:
 - <folder name>
   └ youtube-dl-assistant.exe
   └ youtube-dl.exe
+  └ ...
 ```
 
 # Auto generated files
