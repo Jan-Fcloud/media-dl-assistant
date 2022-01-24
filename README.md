@@ -14,7 +14,7 @@ Note: Without youtube-dl, my program is useless. The download will only be neces
 # Setup
 The setup is simple with only 1 or 2 steps necessary.
 
-Place the youtube-dl-assistant.exe in a folder of your choosing and place the downloaded youtube-exe beside it.
+Place the youtube-dl-assistant.exe and it's dlls in a folder of your choosing and place the downloaded youtube-exe beside it.
 
 Your directory should pretty much look like this:
 ```
