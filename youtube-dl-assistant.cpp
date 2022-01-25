@@ -1,5 +1,4 @@
-// command += " > nul:";
-/// "> nul" hides console output!
+/// youtube-dl-assistant v1.1
 
 #include <iostream>
 #include <windows.h>
@@ -12,6 +11,8 @@ bool loadedConfig = false;
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
+void color(string tcolor);
+
 struct settings{
     char option = '999';
     string url = "";
@@ -20,6 +21,7 @@ struct settings{
     bool thumbnail = true;
     bool webm = false;
     bool playlist = false;
+    bool processed = false;
 }settings;
 
 struct advSettings{
@@ -84,11 +86,20 @@ void outputadvSettings(string setting, bool enabled);
 void mainSettings();
 void beginDownload();
 
+void listSupported(){
+    cout<<"Currently supported links:\n";
+    cout<<"- YouTube "; color("yellow"); cout<<"(Age restricted unsupported)\n"; color("white");
+    cout<<"- Twitch "; color("yellow"); cout<<"(Livestreams not functional in this version)\n"; color("white");
+    cout<<"- Twitter\n";
+    cout<<"- Instagram\n";
+    cout<<"- Reddit\n";
+    cout<<"- Soundcloud (Song and Playlists)\n";
+}
+
 
 int main(){
     // Startup setup:
     setupEXE();
-
 
     bool yep = true;
 
@@ -99,7 +110,7 @@ int main(){
 
     string cmdTitle = "youtube-dl Assistant - v" + versiontx;
     SetConsoleTitleA(cmdTitle.c_str());
-    cout<<"Input YouTube URL: "<<endl;
+    cout<<"Input Supported URL: (type \"support\" to list all compatible links)"<<endl;
     getline(cin, settings.url);
 
     do{
@@ -108,17 +119,41 @@ int main(){
                 settings.playlist = true;
             }
             yep = false;
+            mainSettings(1);
         }
-
+        else if(settings.url.find("twitch") != string::npos){
+            beginDownload();
+            yep = false;
+            }
+         else if(settings.url.find("twitter") != string::npos){
+            beginDownload();
+            yep = false;
+            }
+        else if(settings.url.find("instagram") != string::npos){
+            beginDownload();
+            yep = false;
+            }
+        else if(settings.url.find("reddit") != string::npos){
+            beginDownload();
+            yep = false;
+            }
+         else if(settings.url.find("soundcloud") != string::npos){
+            beginDownload();
+            yep = false;
+            }
         else{
             system("cls");
-            cout<<"Given URL is not a YouTube URL. Please try again."<<endl;
+            if(settings.url.find("support") != string::npos){
+                listSupported();
+                settings.url = "";
+            }
+            else{
+                cout<<"Given URL is not a valid or supported URL. Please try again."<<endl;
+            }
+            cout<<endl<<"Input Supported URL: "<<endl;
             getline(cin, settings.url);
         }
-
     }while(yep);
-
-    mainSettings(1);
 
     SetConsoleTextAttribute(hConsole, 2); // 4-red, 2-green, 7-white
     cout<<endl<<"The program has completed it's job."<<endl<<"Press ENTER to close."<<endl;
@@ -151,8 +186,8 @@ void outputadvSettings(){
     outputadvSettings("d) Use CMD tittle as Status", advSettings.tittleStatus);
 
     // List unimplemented
-    cout<<"e) List all available formats = "; SetConsoleTextAttribute(hConsole, 6); cout<<"unimplemented"<<endl; SetConsoleTextAttribute(hConsole, 7);
-    cout<<"f) Login to Account = "; SetConsoleTextAttribute(hConsole, 6); cout<<"unimplemented"<<endl; SetConsoleTextAttribute(hConsole, 7);
+    //cout<<"e) List all available formats = "; SetConsoleTextAttribute(hConsole, 6); cout<<"unimplemented"<<endl; SetConsoleTextAttribute(hConsole, 7);
+    cout<<"e) Login to Account = "; SetConsoleTextAttribute(hConsole, 6); cout<<"unimplemented"<<endl; SetConsoleTextAttribute(hConsole, 7);
 
     cout<<endl<<"x) Back to Main Menu"<<endl;
     mainSettings();
@@ -288,6 +323,12 @@ void mainSettings(){
 
 void beginDownload(){
     string command = "youtube-dl.exe ";
+    if(settings.url.find("twitch") != string::npos){
+        cout<<"Downloading Twitch clip..."<<endl<<endl;
+        command += settings.url;
+        system(command.c_str());
+    }
+    else{
     if(settings.mp3){
         command += "--audio-format mp3 -x ";
     }
@@ -303,7 +344,7 @@ void beginDownload(){
     if(settings.playlist){
         command += "--yes-playlist ";
     }
-    if(advSettings.overwrites == false){
+    if(advSettings.overwrites != true){
         command += "--no-overwrites ";
     }
     if(advSettings.description){
@@ -326,4 +367,18 @@ void beginDownload(){
     //cout<<endl<<"Final Command: "<<command<<endl<<endl;
     cout<<endl;
     system(command.c_str());
+    }
 }
+
+void color(string tcolor = "reset"){
+    if(tcolor == "red")
+        SetConsoleTextAttribute(hConsole, 4); // 4-red, 2-green, 7-white
+    else if(tcolor == "green")
+        SetConsoleTextAttribute(hConsole, 2);
+    else if(tcolor == "white")
+        SetConsoleTextAttribute(hConsole, 7);
+    else if(tcolor == "yellow")
+        SetConsoleTextAttribute(hConsole, 6);
+    else
+        SetConsoleTextAttribute(hConsole, 7);
+    }
