@@ -1,4 +1,4 @@
-/// youtube-dl-assistant v1.1
+/// youtube-dl-assistant v1.1.1
 
 #include <iostream>
 #include <windows.h>
@@ -29,10 +29,21 @@ struct advSettings{
     bool description = false;
     bool metadata = false;
     bool tittleStatus = false;
+    bool debug = false;
     // List formats
     // login
 
 }advSettings;
+
+void mainSettings(int start);
+void outputSettings();
+void outputSettings(string setting, bool enabled);
+void outputadvSettings();
+void outputadvSettings(string setting, bool enabled);
+void mainSettings();
+void beginDownload();
+void listSupported();
+void startOtherDownload();
 
 void setupEXE(){
     cout<<"Checking for update...";
@@ -63,9 +74,9 @@ void setupEXE(){
         }
         else{
             cout<<"Done\n";
-            SetConsoleTextAttribute(hConsole, 4);
+            color("red");
             cout<<"Config not found.\n\n";
-            SetConsoleTextAttribute(hConsole, 7);
+            color("white");
         }
     }
     catch(...){
@@ -73,31 +84,12 @@ void setupEXE(){
         cout<<"There was an error trying to open the config file.\nFile either can't be accessed or it doesn't exist.\n\n"<<endl;
     }
 
-    SetConsoleTextAttribute(hConsole, 6);
+    color("yellow");
     cout<<"Note: Config not yet functional.\nChecker has been implemented for the future!"<<endl<<endl;
-    SetConsoleTextAttribute(hConsole, 7);
+    color("white");
 }
 
-void mainSettings(int start);
-void outputSettings();
-void outputSettings(string setting, bool enabled);
-void outputadvSettings();
-void outputadvSettings(string setting, bool enabled);
-void mainSettings();
-void beginDownload();
-
-void listSupported(){
-    cout<<"Currently supported links:\n";
-    cout<<"- YouTube "; color("yellow"); cout<<"(Age restricted unsupported)\n"; color("white");
-    cout<<"- Twitch "; color("yellow"); cout<<"(Livestreams not functional in this version)\n"; color("white");
-    cout<<"- Twitter\n";
-    cout<<"- Instagram\n";
-    cout<<"- Reddit\n";
-    cout<<"- Soundcloud (Song and Playlists)\n";
-}
-
-
-int main(){
+void initializeEXE(){
     // Startup setup:
     setupEXE();
 
@@ -122,23 +114,28 @@ int main(){
             mainSettings(1);
         }
         else if(settings.url.find("twitch") != string::npos){
-            beginDownload();
+            cout<<"Downloading Twitch Clip/Stream..."<<endl;
+            startOtherDownload();
             yep = false;
             }
          else if(settings.url.find("twitter") != string::npos){
-            beginDownload();
+            cout<<"Downloading Twitter Video..."<<endl;
+            startOtherDownload();
             yep = false;
             }
         else if(settings.url.find("instagram") != string::npos){
-            beginDownload();
+            cout<<"Downloading Instagram Post..."<<endl;
+            startOtherDownload();
             yep = false;
             }
         else if(settings.url.find("reddit") != string::npos){
-            beginDownload();
+            cout<<"Downloading Reddit Video..."<<endl;
+            startOtherDownload();
             yep = false;
             }
          else if(settings.url.find("soundcloud") != string::npos){
-            beginDownload();
+            cout<<"Downloading SoundCloud song..."<<endl;
+            startOtherDownload();
             yep = false;
             }
         else{
@@ -155,10 +152,31 @@ int main(){
         }
     }while(yep);
 
-    SetConsoleTextAttribute(hConsole, 2); // 4-red, 2-green, 7-white
-    cout<<endl<<"The program has completed it's job."<<endl<<"Press ENTER to close."<<endl;
-    cin.ignore();
+    color("green");
+    cout<<endl<<"The program has completed it's job."<<endl<<"Press ENTER to download another file!"<<endl;
     cin.get();
+    cin.ignore();
+
+    color("white");
+
+    initializeEXE();
+
+}
+
+void listSupported(){
+    cout<<"Currently supported links:\n";
+    cout<<"- YouTube "; color("yellow"); cout<<"(Age restricted unsupported)\n"; color("white");
+    cout<<"- Twitch "; color("yellow"); cout<<"(Livestreams not functional in this version)\n"; color("white");
+    cout<<"- Twitter\n";
+    cout<<"- Instagram\n";
+    cout<<"- Reddit\n";
+    cout<<"- Soundcloud (Song and Playlists)\n";
+}
+
+
+int main(){
+    //Start Program
+    initializeEXE();
 
 }
 
@@ -184,10 +202,12 @@ void outputadvSettings(){
     outputadvSettings("b) Output Description", advSettings.description);
     outputadvSettings("c) Output Metadata", advSettings.metadata);
     outputadvSettings("d) Use CMD tittle as Status", advSettings.tittleStatus);
+    cout<<endl;
+    outputadvSettings("e) Enable DEBUG mode", advSettings.debug);
 
     // List unimplemented
-    //cout<<"e) List all available formats = "; SetConsoleTextAttribute(hConsole, 6); cout<<"unimplemented"<<endl; SetConsoleTextAttribute(hConsole, 7);
-    cout<<"e) Login to Account = "; SetConsoleTextAttribute(hConsole, 6); cout<<"unimplemented"<<endl; SetConsoleTextAttribute(hConsole, 7);
+    //cout<<"e) List all available formats = "; color("yellow"); cout<<"unimplemented"<<endl; color("white");
+    cout<<"f) Login to Account = "; color("yellow"); cout<<"unimplemented"<<endl; color("white");
 
     cout<<endl<<"x) Back to Main Menu"<<endl;
     mainSettings();
@@ -197,30 +217,30 @@ void outputSettings(string setting, bool enabled){
     cout<<setting<<" = ";
     switch(enabled){
     case true:
-        SetConsoleTextAttribute(hConsole, 2); // 4-red, 2-green, 7-white
+        color("green");
         cout<<"true"<<endl;
         break;
     case false:
-        SetConsoleTextAttribute(hConsole, 4); // 4-red, 2-green, 7-white
+        color("red");
         cout<<"false"<<endl;
         break;
     }
-    SetConsoleTextAttribute(hConsole, 7); // 4-red, 2-green, 7-white
+    color("white");
 }
 
 void outputadvSettings(string setting, bool enabled){
     cout<<setting<<" = ";
     switch(enabled){
     case true:
-        SetConsoleTextAttribute(hConsole, 2); // 4-red, 2-green, 7-white
+        color("green");
         cout<<"true"<<endl;
         break;
     case false:
-        SetConsoleTextAttribute(hConsole, 4); // 4-red, 2-green, 7-white
+        color("red");
         cout<<"false"<<endl;
         break;
     }
-    SetConsoleTextAttribute(hConsole, 7); // 4-red, 2-green, 7-white
+    color("white");
 }
 
 void mainSettings(int start){
@@ -303,39 +323,52 @@ void mainSettings(){
             outputadvSettings();
             break;
         }
+        case 'e':{
+            advSettings.debug = !advSettings.debug;
+            outputadvSettings();
+            break;
+        }
         case 'x':{
             outputSettings();
             break;
         }
         default:{
-            SetConsoleTextAttribute(hConsole, 4); // 4-red, 2-green, 7-white
+            color("red");
             cout<<endl<<"Command doesn't exist..."<<endl<<" Press ENTER to continue."<<endl;
             cin.ignore();
             cin.get();
-            SetConsoleTextAttribute(hConsole, 7);
+            color("white");
             outputSettings();
         }
     }
 
 }
 
+void startOtherDownload(){
+    string command = "youtube-dl.exe ";
 
+    command += settings.url;
+
+    /*////////////////////
+    /// DEBUG SETTING  ///
+    ////////////////////*/
+    if(advSettings.debug){color("red");cout<<endl<<"Final Command: "<<command<<endl<<endl;color("white");cout<<endl; }
+    /*/////////////////////
+    // END DEBUG SETTING //
+    /////////////////////*/
+
+    system(command.c_str());
+}
 
 void beginDownload(){
     string command = "youtube-dl.exe ";
-    if(settings.url.find("twitch") != string::npos){
-        cout<<"Downloading Twitch clip..."<<endl<<endl;
-        command += settings.url;
-        system(command.c_str());
-    }
-    else{
     if(settings.mp3){
-        command += "--audio-format mp3 -x ";
+        command += "--audio-format mp3 -x -f worstvideo+bestaudio/best ";
     }
-    else if(settings.mp4){
+    if(settings.mp4){
         command += "--format mp4 ";
     }
-    else if(settings.webm){
+    if(settings.webm){
         command += "--format webm ";
     }
     if(settings.thumbnail){
@@ -364,11 +397,19 @@ void beginDownload(){
     }
 
     command += settings.url;
-    //cout<<endl<<"Final Command: "<<command<<endl<<endl;
-    cout<<endl;
+
+
+    /*////////////////////
+    /// DEBUG SETTING  ///
+    ////////////////////*/
+    if(advSettings.debug){color("red");cout<<endl<<"Final Command: "<<command<<endl<<endl;color("white");cout<<endl; }
+    /*/////////////////////
+    // END DEBUG SETTING //
+    /////////////////////*/
+
+
     system(command.c_str());
     }
-}
 
 void color(string tcolor = "reset"){
     if(tcolor == "red")
