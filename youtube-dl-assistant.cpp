@@ -1,4 +1,4 @@
-/// youtube-dl-assistant v1.1.1
+/// youtube-dl-assistant v1.2
 
 #include <iostream>
 #include <windows.h>
@@ -7,11 +7,18 @@
 
 using namespace std;
 
+/////////////////////////////////
+/// DON'T FORGET VERSION PLS! ///
+    string yddlav = "v1.2.0";
+/// THANKS ME!                ///
+/////////////////////////////////
+
 bool loadedConfig = false;
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 void color(string tcolor);
+bool cfgValues[] = {false,false,false,false,false,false,false,false,false,false,false};
 
 struct settings{
     char option = '999';
@@ -22,6 +29,7 @@ struct settings{
     bool webm = false;
     bool playlist = false;
     bool processed = false;
+
 }settings;
 
 struct advSettings{
@@ -30,6 +38,8 @@ struct advSettings{
     bool metadata = false;
     bool tittleStatus = false;
     bool debug = false;
+    bool rememberUse = false;
+    bool debugMode = false;
     // List formats
     // login
 
@@ -44,6 +54,8 @@ void mainSettings();
 void beginDownload();
 void listSupported();
 void startOtherDownload();
+void loadConfig();
+void writeConfig();
 
 void setupEXE(){
     cout<<"Checking for update...";
@@ -53,23 +65,60 @@ void setupEXE(){
 
     cout<<"Checking for config...";
     try{
-        ifstream downloadConfig("config.json");
+
+        bool yup = false;
+        string temp;
+
+        ifstream useConfig("temp.txt");
+        if(useConfig.is_open() && useConfig.good()){
+            getline(useConfig, temp);
+
+            if(temp == "true"){
+                yup = true;
+            }
+
+        }
+        else{
+            ofstream createTemp("temp.txt");
+            createTemp<<"false";
+
+            createTemp.close();
+        }
+
+        useConfig.close();
+
+        ifstream downloadConfig("config.cfg");
 
         if(downloadConfig.is_open()){
             if(downloadConfig.good()){
                 char agree;
-                cout<<"Done\n";
-                cout<<"Config found! Would you like to use it? Y or N";
-                cin>>agree;
-                cin.ignore();
+                cout<<"Done\n"; color("green");
+                cout<<"\nConfig found! Would you like to use it? Y or N\n"; color("white"); cout<<"Option: ";
 
-                if(agree == 'y' || agree == 'Y'){
+                if(yup){
+                    color("green"); cout<<"y (set by user config)\n";
+                    color("white");
+
                     loadedConfig = true;
-                    cout<<"Config will be used\n";
+                    cout<<"Config will be used\n\n";
+                    loadConfig();
                 }
                 else{
-                    cout<<"Config will not be used\n";
+                    cin>>agree;
+                    cin.ignore();
+
+                    cout<<endl;
+
+                    if(agree == 'y' || agree == 'Y'){
+                        loadedConfig = true;
+                        cout<<"Config will be used\n\n";
+                        loadConfig();
+                    }
+                    else{
+                        cout<<"Config will not be used\nApplying program defaults...\n\n";
+                    }
                 }
+
             }
         }
         else{
@@ -84,8 +133,10 @@ void setupEXE(){
         cout<<"There was an error trying to open the config file.\nFile either can't be accessed or it doesn't exist.\n\n"<<endl;
     }
 
+    /*
     color("yellow");
     cout<<"Note: Config not yet functional.\nChecker has been implemented for the future!"<<endl<<endl;
+    */
     color("white");
 }
 
@@ -102,7 +153,7 @@ void initializeEXE(){
 
     string cmdTitle = "youtube-dl Assistant - v" + versiontx;
     SetConsoleTitleA(cmdTitle.c_str());
-    cout<<"Input Supported URL: (type \"support\" to list all compatible links)"<<endl;
+    cout<<"Input Supported URL: (type \"support\" to list all compatible links or \"help\" for all commands)"<<endl;
     getline(cin, settings.url);
 
     do{
@@ -140,20 +191,43 @@ void initializeEXE(){
             }
         else{
             system("cls");
-            if(settings.url.find("support") != string::npos){
+            if(settings.url.find("version") != string::npos){
+                cout<<"Current program versions:\n";
+                color("green");
+                cout<<"youtube-dl-assistant "<<yddlav<<endl;
+                cout<<"youtube-dl v"<<versiontx<<endl;
+                color("white");
+            }
+            else if(settings.url.find("support") != string::npos){
                 listSupported();
                 settings.url = "";
+            }
+            else if(settings.url.find("debug") != string::npos){
+                advSettings.debugMode = true;
+                outputSettings();
+                yep = false;
+            }
+            else if(settings.url.find("help") != string::npos){
+                cout<<"Current available commands:\n";
+                cout<<"help - lists all available commands\n";
+                cout<<"support - lists all yt-dl-assistant compatible links\n";
+                cout<<"debug - activates debug mode for feature testing (not usable to normal users / doesn't download)\n";
+                cout<<"version - shows current youtube-dl and youtube-dl-assistant versions\n";
             }
             else{
                 cout<<"Given URL is not a valid or supported URL. Please try again."<<endl;
             }
-            cout<<endl<<"Input Supported URL: "<<endl;
-            getline(cin, settings.url);
+            if(advSettings.debugMode == false){
+               cout<<endl<<"Input Supported URL: "<<endl;
+               getline(cin, settings.url);
+            }
+
         }
     }while(yep);
 
     color("green");
     cout<<endl<<"The program has completed it's job."<<endl<<"Press ENTER to download another file!"<<endl;
+    if(advSettings.debugMode == true){color("red"); cout<<"Debug mode disabled\n"; color("white"); advSettings.debugMode = false;}
     cin.get();
     cin.ignore();
 
@@ -175,6 +249,7 @@ void listSupported(){
 
 
 int main(){
+
     //Start Program
     initializeEXE();
 
@@ -182,6 +257,9 @@ int main(){
 
 void outputSettings(){
     system("cls");
+    if(advSettings.debugMode){
+        color("red"); cout<<"!!!Debug mode!!!\n"; color("white");
+    }
     cout<<"Fast Setup Settings:"<<endl;
     outputSettings("1) mp3", settings.mp3);
     outputSettings("2) mp4", settings.mp4);
@@ -197,17 +275,22 @@ void outputSettings(){
 
 void outputadvSettings(){
     system("cls");
+    if(advSettings.debugMode){
+        color("red"); cout<<"!!!Debug mode!!!\n"; color("white");
+    }
     cout<<"Advanced Settings:"<<endl;
     outputadvSettings("a) Overwrite Files", advSettings.overwrites);
     outputadvSettings("b) Output Description", advSettings.description);
     outputadvSettings("c) Output Metadata", advSettings.metadata);
     outputadvSettings("d) Use CMD tittle as Status", advSettings.tittleStatus);
+    outputadvSettings("e) Use Config on startup", advSettings.rememberUse);
     cout<<endl;
-    outputadvSettings("e) Enable DEBUG mode", advSettings.debug);
+    outputadvSettings("f) Enable DEBUG mode", advSettings.debug);
+    cout<<"g) Write Config file"<<endl;
 
     // List unimplemented
     //cout<<"e) List all available formats = "; color("yellow"); cout<<"unimplemented"<<endl; color("white");
-    cout<<"f) Login to Account = "; color("yellow"); cout<<"unimplemented"<<endl; color("white");
+    cout<<"h) Login to Account = "; color("yellow"); cout<<"unimplemented"<<endl; color("white");
 
     cout<<endl<<"x) Back to Main Menu"<<endl;
     mainSettings();
@@ -324,7 +407,17 @@ void mainSettings(){
             break;
         }
         case 'e':{
+            advSettings.rememberUse = !advSettings.rememberUse;
+            outputadvSettings();
+            break;
+        }
+        case 'f':{
             advSettings.debug = !advSettings.debug;
+            outputadvSettings();
+            break;
+        }
+        case 'g':{
+            writeConfig();
             outputadvSettings();
             break;
         }
@@ -407,8 +500,9 @@ void beginDownload(){
     // END DEBUG SETTING //
     /////////////////////*/
 
-
-    system(command.c_str());
+    if(advSettings.debugMode == false){
+      system(command.c_str());
+    }
     }
 
 void color(string tcolor = "reset"){
@@ -422,4 +516,186 @@ void color(string tcolor = "reset"){
         SetConsoleTextAttribute(hConsole, 6);
     else
         SetConsoleTextAttribute(hConsole, 7);
+    }
+
+    /*
+    debug=false
+    mp3=true
+    mp4=false
+    thumbnail=true
+    webm=false
+    playlist=false
+    overwrites=false
+    description=false
+    metadata=false
+    tittleStatus=false
+    */
+
+    string cfgSettings[] = {
+            "debug=","mp3=","mp4=",
+            "thumbnail=","webm=",
+            "playlist=","overwrites=",
+            "description=","metadata=",
+            "tittleStatus=",
+            "alwaysUseConfig="
+        };
+
+    void loadConfig(){
+        int itemp;
+        string temp, temp2;
+
+        ifstream downloadConfig("config.cfg");
+
+        for(int i = 0; i<11; i++){
+            if(downloadConfig.is_open()){
+                if(downloadConfig.good()){
+                    getline(downloadConfig, temp);
+                    itemp = temp.find(cfgSettings[i]);
+                    temp2 = temp.substr(itemp+(cfgSettings[i].size()));
+
+                    if((temp.find("debug") != string::npos) && (temp.find("true") != string::npos)){
+                        advSettings.debug = true;
+                    }
+
+                    if(temp2 == "true"){
+                        cfgValues[i] = true;
+                        color("red");
+                    }
+                    else{
+                        cfgValues[i] = false;
+                    }
+
+                    /*////////////////////
+                    /// DEBUG SETTING  ///
+                    ////////////////////*/
+                    if (advSettings.debug){
+                        cout<<"Loop "<<i<<". "<<endl;
+                        cout<<"Pulled: "<<temp<<" from -> config.cfg\n";
+                        cout<<"Found bool value on position: "<<itemp+(cfgSettings[i].size())<<endl;
+                        cout<<"Set cfgValues["<<i<<"] boolean to: ";
+
+                        if(cfgValues[i] == true){
+                            cout<<"true";
+                        }
+                        else{
+                            cout<<"false";
+                        }
+
+                        cout<<endl<<endl;
+                    }
+                    /*/////////////////////
+                    // END DEBUG SETTING //
+                    /////////////////////*/
+
+
+
+
+                }
+            }
+            else{
+                color("red");
+                cout<<"File not found/not open... (No permissions to read/write?) Aborting...\n";
+                color("white");
+                for(int j = 0; j<11; j++){
+                    cfgValues[j] = false;
+                }
+                break;
+            }
+        }
+
+        downloadConfig.close();
+
+
+        advSettings.debug = cfgValues[0];
+        settings.mp3 = cfgValues[1];
+        settings.mp4 = cfgValues[2];
+        settings.thumbnail = cfgValues[3];
+        settings.webm = cfgValues[4];
+        settings.playlist = cfgValues[5];
+        advSettings.overwrites = cfgValues[6];
+        advSettings.description = cfgValues[7];
+        advSettings.metadata = cfgValues[8];
+        advSettings.tittleStatus = cfgValues[9];
+        advSettings.rememberUse = cfgValues[10];
+
+        color("white");
+
+    }
+
+    void writeConfig(){
+
+        cfgValues[0] = advSettings.debug;
+        cfgValues[1] = settings.mp3; cfgValues[2] = settings.mp4;
+        cfgValues[3] = settings.thumbnail; cfgValues[4] = settings.webm;
+        cfgValues[5] = settings.playlist; cfgValues[6] = advSettings.overwrites;
+        cfgValues[7] = advSettings.description; cfgValues[8] = advSettings.metadata;
+        cfgValues[9] = advSettings.tittleStatus;
+        cfgValues[10] = advSettings.rememberUse;
+
+
+        ofstream writeTemp("temp.txt");
+
+        if(advSettings.rememberUse == true){
+            writeTemp<<"true";
+            writeTemp.close();
+            if(advSettings.debug){ // Debug start
+                color("red");
+                cout<<"rememberUse = true...\n";
+                cout<<"Wrote \"true\" to -> temp.txt\n";
+            } // Debug stop
+        }
+        else{
+            writeTemp<<"false";
+            writeTemp.close();
+
+            if(advSettings.debug){ // Debug start
+                color("red");
+                cout<<"rememberUse = false...\n";
+                cout<<"Wrote \"false\" to -> temp.txt\n";
+            } // Debug stop
+
+        }
+
+        color("white");
+
+        ofstream makeConfig("config.cfg");
+
+        for(int i = 0; i<11; i++){
+            string temp = "";
+            temp += cfgSettings[i];
+
+            if(cfgValues[i] == true){
+                temp += "true";
+            }
+            else{
+                temp += "false";
+            }
+
+            makeConfig<<temp;
+
+            /*////////////////////
+            /// DEBUG SETTING  ///
+            ////////////////////*/
+            if (advSettings.debug){
+                color("red");
+                cout<<"Wrote: "<<temp<<" to file -> config.cfg"<<endl;
+                color("white");
+            }
+            /*/////////////////////
+            // END DEBUG SETTING //
+            /////////////////////*/
+
+            makeConfig<<"\n";
+
+        }
+
+        color("green");
+        cout<<"\nProgram finished writting config file! ENTER to continue...\n"<<endl;
+        color("white");
+        makeConfig.close();
+
+        cin.get();
+        cin.ignore();
+
+
     }
