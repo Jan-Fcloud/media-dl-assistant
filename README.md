@@ -25,10 +25,10 @@ Your directory should pretty much look like this:
 ```
 
 # Auto generated files
-The program itself will only generate 1 file, being **version.txt** which only contains the version of **youtube-dl** and **youtube-dl-assistant**.
+The program itself will only generate 2-3 files, being **version.txt** on startup, which only contains the version of **youtube-dl** and **youtube-dl-assistant**, and if you'll be telling the program to create a config, it'll create 2 additional files being **config.cfg** and **temp.txt**(only necessary for the time being), both being required to run configs.
 
 # Program config
-Currently, youtube-dl-assistant has the function to search for a config.json file but there is no support for configs yet. That will be an update later down the line. youtube-dl already does support it's own configs which I might make it use at first and I'll be adding my own custom one after.
+As of **v1.2.0**, youtube-dl-assistant now makes it's own config and uses it for future program uses. It is not required but if you wish to create and use a config, visit the **advanced settings** after you set all your settings that you want youtube-dl-assistant to keep and remember. So the **config.cfg** checker finally has a use!
 
 ## Note
 This program is by no means a modification of the youtube-dl.exe
