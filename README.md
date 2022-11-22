@@ -1,9 +1,3 @@
-# The current version of the program seems to be outdated and not functining properly.
-With the continuous updates of youtube-dl, this middleman appears to be outdated at the moment.
-The program will be reworked and rewritten as soon as there will be time.
-
-Feel free to still download it and try your luck, but it's confirmed unstable with it's current version.
-
 # youtube-dl-Assistant
 This is a user friendly middleman for the youtube-dl.exe downloader.
 
